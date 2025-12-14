@@ -8,6 +8,7 @@ on:
 jobs:
   sync-iteration:
     runs-on: ubuntu-latest
+    environment: podaac projects
     permissions:
       issues: read
       contents: read
