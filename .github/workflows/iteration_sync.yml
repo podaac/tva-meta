@@ -130,7 +130,7 @@ jobs:
                 // Get the source iteration title
   
                 const sourceIteration = item.fieldValues.nodes.find(
-                  v => v.field?.name === "Iteration"
+                  v => v.field?.name === "Sprint"
                 )?.title;
 
                 if (!sourceIteration) continue; 
