@@ -144,49 +144,10 @@ jobs:
                   console.log(`Skipping issue #${item.content.number}, iteration "${sourceIteration}" not found in TVA`);
                   continue;
                 }
+            
+                console.log(`Found target iteration "${targetIteration.title}" with ID ${targetIteration.id}`);
               
-                // 1️⃣ Add issue to TVA project
-                const addMutation = `
-                  mutation ($projectId: ID!, $contentId: ID!) {
-                    addProjectV2ItemById(
-                      projectId: $projectId
-                      contentId: $contentId
-                    ) {
-                      item { id }
-                    }
-                  }
-                `;
-                const added = await github.graphql(addMutation, {
-                  projectId: tvaProject.id,
-                  contentId: item.content.id
-                });
-              
-                const tvaItemId = added.addProjectV2ItemById.item.id;
-              
-                // 2️⃣ Set iteration field in TVA
-                const updateMutation = `
-                  mutation ($projectId: ID!, $itemId: ID!, $fieldId: ID!, $iterationId: String!) {
-                    updateProjectV2ItemFieldValue(
-                      input: {
-                        projectId: $projectId
-                        itemId: $itemId
-                        fieldId: $fieldId
-                        value: { iterationId: $iterationId }
-                      }
-                    ) {
-                      projectV2Item { id }
-                    }
-                  }
-                `;
-              
-                await github.graphql(updateMutation, {
-                  projectId: tvaProject.id,
-                  itemId: tvaItemId,
-                  fieldId: tvaIterationField.id,
-                  iterationId: targetIteration.id
-                });
-              
-                console.log(`Synced issue #${item.content.number} to TVA iteration "${sourceIteration}"`);
+
             
               }
 
