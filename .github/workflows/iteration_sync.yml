@@ -20,8 +20,7 @@ jobs:
           github-token: ${{ secrets.PROJECTS_TOKEN }}
           script: |
             const ORG = "podaac";
-            const TVA_PROJECT_NUMBER = 74; // TVA project number
-
+            const TVA_PROJECT_NAME = "TVA";
             const ALLOWED_SOURCE_PROJECTS = [
               "hitide-25.4",
               "SOTO PI 25.4"
@@ -83,6 +82,40 @@ jobs:
               return res.node.items.nodes;
             }
             
+            const tvaProject = await getProjectByTitle(TVA_PROJECT_NAME);
+            if (!tvaProject) throw new Error("TVA project not found");
+            
+            // Fetch TVA iteration field and configured iterations
+            async function getIterationField(projectId) {
+              const query = `
+                query ($projectId: ID!) {
+                  node(id: $projectId) {
+                    ... on ProjectV2 {
+                      fields(first: 50) {
+                        nodes {
+                          ... on ProjectV2IterationField {
+                            id
+                            name
+                            configuration {
+                              iterations {
+                                id
+                                title
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              `;
+              const res = await github.graphql(query, { projectId });
+              return res.node.fields.nodes.find(f => f.name === "Iteration");
+            }
+            
+            const tvaIterationField = await getIterationField(tvaProject.id);
+            if (!tvaIterationField) throw new Error("TVA iteration field missing");
+            
             for (const sourceName of ALLOWED_SOURCE_PROJECTS) {
               console.log(`Processing source project: ${sourceName}`);
               const sourceProject = await getProjectByTitle(sourceName);
@@ -92,6 +125,12 @@ jobs:
 
               for (const item of items) {
                 console.log(`Processing item: ${item.content.id} ${item.content.title}`);
+                if (!item.content) continue;
+
+                // Get the source iteration title
+                console.log(`Fetching iteration for item ${item.fieldValues.nodes}`);
+                
+            
               }
 
             }
