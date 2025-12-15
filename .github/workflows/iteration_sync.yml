@@ -122,30 +122,38 @@ jobs:
               if (!sourceProject) continue;
 
               const items = await getItems(sourceProject.id);
+              // Fetch all items from TVA project once per source project
+              const tvaItems = await getItems(tvaProject.id);
 
               for (const item of items) {
                 console.log(`Processing item: ${item.content.id} ${item.content.title}`);
                 if (!item.content) continue;
 
                 // Get the source iteration title
-  
                 const sourceIteration = item.fieldValues.nodes.find(
                   v => v.field?.name === "Sprint"
                 )?.title;
 
                 if (!sourceIteration) continue; 
                 console.log(`Fetching source iteration for item ${sourceIteration}`);
-                
+
                 const targetIteration = tvaIterationField.configuration.iterations.find(
                   i => i.title === sourceIteration
                 );
-                
-              
+
                 if (!targetIteration) {
                   console.log(`Skipping issue #${item.content.number}, iteration "${sourceIteration}" not found in TVA`);
                   continue;
                 }
-            
+
+                // Find the corresponding item in TVA project by content.id
+                const tvaItem = tvaItems.find(tvaIt => tvaIt.content && tvaIt.content.id === item.content.id);
+                if (!tvaItem) {
+                  console.log(`Issue ${item.content.id} not found in TVA project`);
+                  continue;
+                }
+                const tvaItemId = tvaItem.id;
+
                 // 2️⃣ Set iteration field in TVA
                 // we assume the issue is already added to the TVA project
                 const updateMutation = `
@@ -162,16 +170,15 @@ jobs:
                     }
                   }
                 `;
-              
+
                 await github.graphql(updateMutation, {
                   projectId: tvaProject.id,
-                  itemId: item.content.id,
+                  itemId: tvaItemId,
                   fieldId: tvaIterationField.id,
                   iterationId: targetIteration.id
                 });
-            
+
                 console.log(`Found target iteration "${targetIteration.title}" with ID ${targetIteration.id}`);
-              
               }
 
             }
