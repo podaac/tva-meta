@@ -62,6 +62,7 @@ jobs:
                           }
                           fieldValues(first: 20) {
                             nodes {
+                              # iteration
                               ... on ProjectV2ItemFieldIterationValue {
                                 title
                                 field {
@@ -70,6 +71,15 @@ jobs:
                                   }
                                 }
                               }
+                              # Estimate (Number field)
+                              ... on ProjectV2ItemFieldNumberValue {
+                                number
+                                field {
+                                  ... on ProjectV2Field {
+                                    name
+                                  }
+                                }
+                              } 
                             }
                           }
                         }
