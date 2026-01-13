@@ -1,4 +1,4 @@
-name: Sync GitHub Project Iterations
+name: Sync Iterations refs from/to (defined in action env)
 
 on:
   workflow_dispatch:

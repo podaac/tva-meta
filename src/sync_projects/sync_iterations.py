@@ -62,6 +62,13 @@ def get_project(project_number):
 
 def sync_iterations():
     _, source_field = get_project(SOURCE_PROJECT_NUMBER)
+
+    token = os.environ.get("GH_TOKEN")
+    if not token:
+        raise RuntimeError("GH_TOKEN is not set")
+
+    print(f"Token length: {len(token)}")
+
     target_project_id, target_field = get_project(TARGET_PROJECT_NUMBER)
 
     source_iterations = source_field["configuration"]["iterations"]
