@@ -1,0 +1,21 @@
+name: Sync GitHub Project Iterations
+
+on:
+  workflow_dispatch:
+
+jobs:
+  sync-iterations:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Sync iterations
+        env:
+          GH_TOKEN: ${{ secrets.PROJECTS_TOKEN }}
+          ORG: podaac
+          SOURCE_PROJECT_NUMBER: tva
+          TARGET_PROJECT_NUMBER: podaac
+        run: |
+          python3 sync_iterations.py
