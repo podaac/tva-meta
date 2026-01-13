@@ -15,7 +15,7 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.PROJECTS_TOKEN }}
           ORG: podaac
-          SOURCE_PROJECT_NUMBER: tva
-          TARGET_PROJECT_NUMBER: podaac
+          SOURCE_PROJECT_NUMBER: 74
+          TARGET_PROJECT_NUMBER: 75
         run: |
           python3 src/sync_projects/sync_iterations.py
