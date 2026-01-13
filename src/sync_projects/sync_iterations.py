@@ -3,6 +3,12 @@ import requests
 
 GITHUB_API = "https://api.github.com/graphql"
 
+token = os.environ.get("GH_TOKEN")
+if not token:
+    raise RuntimeError("GH_TOKEN is not set")
+
+print(f"Token length: {len(token)}")
+
 HEADERS = {
     "Authorization": f"Bearer {os.environ['GH_TOKEN']}",
     "Content-Type": "application/json",
@@ -26,7 +32,7 @@ def graphql(query, variables=None):
 def get_project(project_number):
     query = """
     query ($org: String!, $number: Int!) {
-      organization(login: $org) {
+      user(login: login) {
         projectV2(number: $number) {
           id
           fields(first: 50) {
@@ -62,12 +68,6 @@ def get_project(project_number):
 
 def sync_iterations():
     _, source_field = get_project(SOURCE_PROJECT_NUMBER)
-
-    token = os.environ.get("GH_TOKEN")
-    if not token:
-        raise RuntimeError("GH_TOKEN is not set")
-
-    print(f"Token length: {len(token)}")
 
     target_project_id, target_field = get_project(TARGET_PROJECT_NUMBER)
 
