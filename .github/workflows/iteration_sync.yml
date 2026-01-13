@@ -71,15 +71,6 @@ jobs:
                                   }
                                 }
                               }
-                              # Estimate (Number field)
-                              ... on ProjectV2ItemFieldNumberValue {
-                                number
-                                field {
-                                  ... on ProjectV2Field {
-                                    name
-                                  }
-                                }
-                              } 
                             }
                           }
                         }
@@ -122,7 +113,7 @@ jobs:
               const res = await github.graphql(query, { projectId });
               return res.node.fields.nodes.find(f => f.name === "Iteration");
             }
-            
+                        
             const tvaIterationField = await getIterationField(tvaProject.id);
             if (!tvaIterationField) throw new Error("TVA iteration field missing");
             
