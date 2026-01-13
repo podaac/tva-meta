@@ -20,7 +20,7 @@ jobs:
           github-token: ${{ secrets.PROJECTS_TOKEN }}
           script: |
             const ORG = "podaac";
-            const TVA_PROJECT_NAME = "TVA";
+            const TVA_PROJECT_NAME = "tva";
             const ALLOWED_SOURCE_PROJECTS = [
               "hitide-25.4",
               "SOTO PI 25.4"
