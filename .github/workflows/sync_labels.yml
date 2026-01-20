@@ -20,6 +20,11 @@ jobs:
 
     steps:
 
+      - name: Authenticate GitHub CLI
+        run: gh auth login
+        env:
+          GH_TOKEN: ${{ secrets.PROJECTS_TOKEN }}
+
       - name: Fetch labels from source repository
         run: |
           gh label list \
