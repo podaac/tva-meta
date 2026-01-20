@@ -1,0 +1,63 @@
+name: Sync Labels Across Organization Repositories
+
+on:
+  workflow_dispatch:
+    inputs:
+      source_repo:
+        description: "Source repository (owner/repo) used as label reference"
+        required: true
+      org:
+        description: "GitHub organization to sync labels into"
+        required: true
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  sync-labels:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Install GitHub CLI
+        uses: cli/cli@v3
+
+      - name: Authenticate GitHub CLI
+        run: echo "${GITHUB_TOKEN}" | gh auth login --with-token
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Fetch labels from source repository
+        run: |
+          gh label list \
+            --repo "${{ inputs.source_repo }}" \
+            --json name,color,description \
+            --limit 1000 > labels.json
+
+      - name: List repositories in organization
+        run: |
+          gh repo list "${{ inputs.org }}" \
+            --limit 1000 \
+            --json name,owner \
+            -q '.[] | "'"'"'" + .owner.login + "/" + .name + "'"'"'"' \
+            > repos.txt
+
+      - name: Add labels to all repositories in organization
+        run: |
+          while read repo; do
+            echo "Syncing labels to $repo"
+            jq -c '.[]' labels.json | while read label; do
+              name=$(echo "$label" | jq -r '.name')
+              color=$(echo "$label" | jq -r '.color')
+              desc=$(echo "$label" | jq -r '.description // ""')
+
+              # Create label only if it does not already exist
+              gh label create "$name" \
+                --repo "$repo" \
+                --color "$color" \
+                --description "$desc" \
+                || true
+            done
+          done < repos.txt
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
