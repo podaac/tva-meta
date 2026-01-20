@@ -19,8 +19,6 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Install GitHub CLI
-        uses: cli/cli@v3
 
       - name: Authenticate GitHub CLI
         run: echo "${GITHUB_TOKEN}" | gh auth login --with-token
