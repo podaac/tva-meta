@@ -20,11 +20,10 @@ jobs:
 
     steps:
 
-      - name: Check that gh authentication worked
-        run: gh api user
-        env:
-          GH_TOKEN: ${{ secrets.PROJECTS_TOKEN }}
-
+#      - name: Check that gh authentication worked
+#        run: gh api user
+#        env:
+#          GH_TOKEN: ${{ secrets.PROJECTS_TOKEN }}
 
       - name: Fetch labels from source repository
         run: |
