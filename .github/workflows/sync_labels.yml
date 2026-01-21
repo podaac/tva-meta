@@ -20,8 +20,8 @@ jobs:
 
     steps:
 
-      - name: Authenticate gh
-        run: gh auth status
+      - name: Check that gh authentication worked
+        run: gh api user
         env:
           GH_TOKEN: ${{ secrets.PROJECTS_TOKEN }}
 
