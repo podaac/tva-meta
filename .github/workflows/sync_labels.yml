@@ -20,10 +20,11 @@ jobs:
 
     steps:
 
-      - name: Authenticate GitHub CLI
-        run: gh auth login
+      - name: Authenticate gh
+        run: gh auth status
         env:
           GH_TOKEN: ${{ secrets.PROJECTS_TOKEN }}
+
 
       - name: Fetch labels from source repository
         run: |
@@ -31,6 +32,9 @@ jobs:
             --repo "${{ inputs.source_repo }}" \
             --json name,color,description \
             --limit 1000 > labels.json
+        env:
+          GH_TOKEN: ${{ secrets.PROJECTS_TOKEN }}
+
 
       - name: List repositories in organization
         run: |
@@ -39,6 +43,8 @@ jobs:
             --json name,owner \
             -q '.[] | "'"'"'" + .owner.login + "/" + .name + "'"'"'"' \
             > repos.txt
+        env:
+          GH_TOKEN: ${{ secrets.PROJECTS_TOKEN }}
 
       - name: Add labels to all repositories in organization
         run: |
@@ -58,4 +64,4 @@ jobs:
             done
           done < repos.txt
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.PROJECTS_TOKEN }}
