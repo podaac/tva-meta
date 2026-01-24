@@ -6,6 +6,7 @@ on:
 jobs:
   sync-iterations:
     runs-on: ubuntu-latest
+    environment: podaac projects
 
     steps:
       - name: Checkout

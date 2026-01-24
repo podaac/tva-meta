@@ -21,29 +21,13 @@ jobs:
 
     steps:
 
-#      - name: Check that gh authentication worked
-#        run: gh api user
-#        env:
-#          GH_TOKEN: ${{ secrets.PROJECTS_TOKEN }}
-
-      - name: Diagnose GH_TOKEN
-        run: |
-          if [ -z "$GH_TOKEN" ]; then
-            echo "❌ GH_TOKEN is EMPTY or UNSET"
-            exit 1
-          else
-            echo "✅ GH_TOKEN is set"
-            echo "Token length: ${#GH_TOKEN}"
-          fi
-        env:
-          GH_TOKEN: ${{ secrets.PROJECTS_TOKEN }}
-
       - name: Fetch labels from source repository
         run: |
           gh label list \
             --repo "${{ inputs.source_repo }}" \
             --json name,color,description \
             --limit 1000 > labels.json
+          cat labels.json
         env:
           GH_TOKEN: ${{ secrets.PROJECTS_TOKEN }}
 
@@ -55,6 +39,7 @@ jobs:
             --json name,owner \
             -q '.[] | "'"'"'" + .owner.login + "/" + .name + "'"'"'"' \
             > repos.txt
+          cat repos.txt
         env:
           GH_TOKEN: ${{ secrets.PROJECTS_TOKEN }}
 
