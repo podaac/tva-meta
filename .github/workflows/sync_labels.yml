@@ -37,7 +37,7 @@ jobs:
           gh repo list "${{ inputs.org }}" \
             --limit 1000 \
             --json name,owner \
-            -q '.[] | "'"'"'" + .owner.login + "/" + .name + "'"'"'"' \
+            -q '.[] | .owner.login + "/" + .name' \
             > repos.txt
           cat repos.txt
         env:
