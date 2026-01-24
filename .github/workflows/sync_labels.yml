@@ -17,6 +17,7 @@ permissions:
 jobs:
   sync-labels:
     runs-on: ubuntu-latest
+    environment: podaac projects
 
     steps:
 
