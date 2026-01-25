@@ -218,6 +218,7 @@ def find_matching_items(source_items, target_items):
     for source_item in source_items:
         # Skip items that aren't issues
         if not source_item.get("content") or source_item["content"].get("__typename") != "Issue":
+            logger.debug("item type is not Issue, skipping ", source_item["content"].get("__typename") if source_item.get("content") else "")
             continue
 
         source_issue = source_item["content"]
