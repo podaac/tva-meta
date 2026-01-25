@@ -181,6 +181,7 @@ def get_project_items(project_id):
                 }
               }
               content {
+                __typename
                 ... on Issue {
                   id
                   number
