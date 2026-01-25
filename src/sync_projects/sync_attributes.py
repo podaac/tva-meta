@@ -465,4 +465,4 @@ def sync_hitide_soto_to_tva_attributes():
     sync_project_attributes(68, 74)
 
 if __name__ == "__main__":
-    sys.exit(sync_hitide_soto_to_tva_attributes)
+    sys.exit(sync_hitide_soto_to_tva_attributes())
