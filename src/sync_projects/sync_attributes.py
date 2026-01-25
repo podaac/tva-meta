@@ -372,7 +372,9 @@ def sync_project_attributes():
 
     # Get items for both projects
     source_items = get_project_items(source_project_id)
+    logger.debug("Source items: %s", source_items)
     target_items = get_project_items(target_project_id)
+    logger.debug("Target items: %s", target_items)
 
     # Find matching items
     matches = find_matching_items(source_items, target_items)
