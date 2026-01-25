@@ -1,0 +1,58 @@
+name: Sync Project Attributes
+
+on:
+  workflow_dispatch:
+    inputs:
+      source_project_number:
+        description: 'Source project number'
+        required: true
+        type: string
+      target_project_number:
+        description: 'Target project number'
+        required: true
+        type: string
+      source_org:
+        description: 'Source organization (leave empty if source project is in current repo)'
+        required: false
+        type: string
+      target_org:
+        description: 'Target organization (leave empty if target project is in current repo)'
+        required: false
+        type: string
+  schedule:
+    # Run every day at midnight
+    - cron: '0 0 * * *'
+
+permissions:
+  contents: read
+  issues: write
+  repository-projects: write
+
+jobs:
+  sync-project-attributes:
+    runs-on: ubuntu-latest
+    environment: projects-sync
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+          cache: 'pip'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install requests
+
+      - name: Run project attribute sync script
+        env:
+          GITHUB_TOKEN: ${{ secrets.PROJECTS_TOKEN }}
+          SOURCE_PROJECT_NUMBER: ${{ github.event.inputs.source_project_number || '1' }}
+          TARGET_PROJECT_NUMBER: ${{ github.event.inputs.target_project_number || '2' }}
+          SOURCE_ORG: ${{ github.event.inputs.source_org || '' }}
+          TARGET_ORG: ${{ github.event.inputs.target_org || '' }}
+        run: python -m src.sync_projects.sync_attributes
