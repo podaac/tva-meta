@@ -73,6 +73,7 @@ def get_project_id(project_number, org=None):
 
     try:
         result = graphql(query, {"owner": owner, "number": project_number})
+        logger.debug(result)
         if not result or not result.get(owner_type, {}).get("projectV2", {}).get("id"):
             logger.error(f"Could not find project {project_number} for {owner_type} {owner}")
             return None
