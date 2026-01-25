@@ -26,8 +26,7 @@ HEADERS = {
 # Get configuration from environment variables
 SOURCE_PROJECT_NUMBER = int(os.environ.get("SOURCE_PROJECT_NUMBER", "68"))
 TARGET_PROJECT_NUMBER = int(os.environ.get("TARGET_PROJECT_NUMBER", "74"))
-SOURCE_ORG = os.environ.get("SOURCE_ORG")
-TARGET_ORG = os.environ.get("TARGET_ORG")
+ORG = "podaac"
 REPO_NAME = os.environ.get("GITHUB_REPOSITORY", "").split("/")[1] if "/" in os.environ.get("GITHUB_REPOSITORY", "") else ""
 REPO_OWNER = os.environ.get("GITHUB_REPOSITORY", "").split("/")[0] if "/" in os.environ.get("GITHUB_REPOSITORY", "") else ""
 
@@ -46,24 +45,13 @@ def graphql(query, variables=None):
     return response.json().get("data", {})
 
 
-def get_project_owner(org):
-    """Determine the project owner and type"""
-    if org:
-        return {"owner": org, "type": "ORGANIZATION"}
-    return {"owner": REPO_OWNER, "type": "USER"}
-
 
 def get_project_id(project_number, org=None):
     """Get the ID of a GitHub Project based on its number"""
-    project_owner = get_project_owner(org)
-    owner_type = project_owner["type"].lower()
-    owner = project_owner["owner"]
-
-    logger.info(f"Getting project ID for {owner_type} {owner} project #{project_number}")
 
     query = f"""
     query($owner: String!, $number: Int!) {{
-      {owner_type}(login: $owner) {{
+      organization(login: $owner) {{
         projectV2(number: $number) {{
           id
         }}
@@ -72,13 +60,13 @@ def get_project_id(project_number, org=None):
     """
 
     try:
-        result = graphql(query, {"owner": owner, "number": project_number})
+        result = graphql(query, {"owner": ORG, "number": project_number})
         logger.debug(result)
-        if not result or not result.get(owner_type, {}).get("projectV2", {}).get("id"):
-            logger.error(f"Could not find project {project_number} for {owner_type} {owner}")
+        if not result or not result.get("organization", {}).get("projectV2", {}).get("id"):
+            logger.error(f"Could not find project {project_number} for organization {ORG}")
             return None
 
-        project_id = result[owner_type]["projectV2"]["id"]
+        project_id = result["organization"]["projectV2"]["id"]
         logger.info(f"Found project ID: {project_id}")
         return project_id
     except Exception as e:
@@ -371,8 +359,8 @@ def sync_project_attributes():
     logger.info("Starting synchronization process")
 
     # Get project IDs
-    source_project_id = get_project_id(SOURCE_PROJECT_NUMBER, SOURCE_ORG)
-    target_project_id = get_project_id(TARGET_PROJECT_NUMBER, TARGET_ORG)
+    source_project_id = get_project_id(SOURCE_PROJECT_NUMBER, ORG)
+    target_project_id = get_project_id(TARGET_PROJECT_NUMBER, ORG)
 
     if not source_project_id or not target_project_id:
         logger.error("Could not find one of the projects. Check project numbers and organization names.")
@@ -420,7 +408,7 @@ def sync_project_attributes():
             field_value_type = None
 
             for node in source_item["fieldValues"]["nodes"]:
-                if node.get("field", {}).get("name", "").lower() == field_name.lower():
+                if node.get("field", {}).get("name", "").lower() == src_field_name.lower():
                     if "text" in node:
                         source_value = node["text"]
                         field_value_type = "text"
@@ -436,7 +424,7 @@ def sync_project_attributes():
                     break
 
             if source_value is None:
-                logger.info(f"No value for field '{field_name}' in issue #{issue_number}, skipping")
+                logger.info(f"No value for field '{src_field_name}' in issue #{issue_number}, skipping")
                 continue
 
             # For single select fields, need to find the option ID in target field
@@ -445,13 +433,13 @@ def sync_project_attributes():
                 target_option = find_option_by_name(target_field, option_name)
 
                 if not target_option:
-                    logger.warning(f"Option '{option_name}' not found in target field '{field_name}', skipping")
+                    logger.warning(f"Option '{option_name}' not found in target field '{target_field_name}', skipping")
                     continue
 
                 source_value = target_option["id"]
 
             # Update the target field
-            logger.info(f"Updating '{field_name}' for issue #{issue_number} '{issue_title}' in target project")
+            logger.info(f"Updating '{target_field_name}' for issue #{issue_number} '{issue_title}' in target project")
             success = update_field_value(
                 target_project_id,
                 target_item["id"],
@@ -462,9 +450,9 @@ def sync_project_attributes():
 
             if success:
                 sync_count += 1
-                logger.info(f"Successfully updated '{field_name}' for issue #{issue_number}")
+                logger.info(f"Successfully updated '{target_field_name}' for issue #{issue_number}")
             else:
-                logger.warning(f"Failed to update '{field_name}' for issue #{issue_number}")
+                logger.warning(f"Failed to update '{target_field_name}' for issue #{issue_number}")
 
     logger.info(f"Synchronization complete. Updated {sync_count} field values.")
     return 0

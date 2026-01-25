@@ -53,6 +53,4 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.PROJECTS_TOKEN }}
           SOURCE_PROJECT_NUMBER: ${{ github.event.inputs.source_project_number || '1' }}
           TARGET_PROJECT_NUMBER: ${{ github.event.inputs.target_project_number || '2' }}
-          SOURCE_ORG: ${{ github.event.inputs.source_org || '' }}
-          TARGET_ORG: ${{ github.event.inputs.target_org || '' }}
         run: python -m src.sync_projects.sync_attributes
