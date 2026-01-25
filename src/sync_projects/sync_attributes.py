@@ -26,8 +26,8 @@ HEADERS = {
 # Get configuration from environment variables
 SOURCE_PROJECT_NUMBER = int(os.environ.get("SOURCE_PROJECT_NUMBER", "68"))
 TARGET_PROJECT_NUMBER = int(os.environ.get("TARGET_PROJECT_NUMBER", "74"))
-SOURCE_ORG = os.environ.get("SOURCE_ORG")
-TARGET_ORG = os.environ.get("TARGET_ORG")
+SOURCE_ORG = os.environ.get("SOURCE_ORG", "podaac")
+TARGET_ORG = os.environ.get("TARGET_ORG", "podaac")
 REPO_NAME = os.environ.get("GITHUB_REPOSITORY", "").split("/")[1] if "/" in os.environ.get("GITHUB_REPOSITORY", "") else ""
 REPO_OWNER = os.environ.get("GITHUB_REPOSITORY", "").split("/")[0] if "/" in os.environ.get("GITHUB_REPOSITORY", "") else ""
 
