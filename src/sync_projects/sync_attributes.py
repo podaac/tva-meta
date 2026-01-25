@@ -24,8 +24,6 @@ HEADERS = {
 }
 
 # Get configuration from environment variables
-SOURCE_PROJECT_NUMBER = int(os.environ.get("SOURCE_PROJECT_NUMBER", "68"))
-TARGET_PROJECT_NUMBER = int(os.environ.get("TARGET_PROJECT_NUMBER", "74"))
 ORG = "podaac"
 REPO_NAME = os.environ.get("GITHUB_REPOSITORY", "").split("/")[1] if "/" in os.environ.get("GITHUB_REPOSITORY", "") else ""
 REPO_OWNER = os.environ.get("GITHUB_REPOSITORY", "").split("/")[0] if "/" in os.environ.get("GITHUB_REPOSITORY", "") else ""
@@ -356,7 +354,7 @@ def update_field_value(project_id, item_id, field_id, field, value):
         return False
 
 
-def sync_project_attributes(source_project_number=SOURCE_PROJECT_NUMBER,target_project_number=TARGET_PROJECT_NUMBER):
+def sync_project_attributes(source_project_number,target_project_number):
     """Main function to synchronize project attributes"""
     logger.info("Starting synchronization process")
 
