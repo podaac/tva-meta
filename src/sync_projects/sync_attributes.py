@@ -5,7 +5,7 @@ import logging
 
 # Configure logging
 logging.basicConfig(
-    level=logging.DEBUG,
+    level=logging.INFO,
     format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
     handlers=[logging.StreamHandler(sys.stdout)]
 )
@@ -356,13 +356,13 @@ def update_field_value(project_id, item_id, field_id, field, value):
         return False
 
 
-def sync_project_attributes():
+def sync_project_attributes(source_project_number=SOURCE_PROJECT_NUMBER,target_project_number=TARGET_PROJECT_NUMBER):
     """Main function to synchronize project attributes"""
     logger.info("Starting synchronization process")
 
     # Get project IDs
-    source_project_id = get_project_id(SOURCE_PROJECT_NUMBER, ORG)
-    target_project_id = get_project_id(TARGET_PROJECT_NUMBER, ORG)
+    source_project_id = get_project_id(source_project_number, ORG)
+    target_project_id = get_project_id(target_project_number, ORG)
 
     if not source_project_id or not target_project_id:
         logger.error("Could not find one of the projects. Check project numbers and organization names.")
@@ -462,5 +462,9 @@ def sync_project_attributes():
     return 0
 
 
+def sync_hitide_soto_to_tva_attributes():
+    sync_project_attributes(67, 74)
+    sync_project_attributes(68, 74)
+
 if __name__ == "__main__":
-    sys.exit(sync_project_attributes())
+    sys.exit(sync_hitide_soto_to_tva_attributes)
