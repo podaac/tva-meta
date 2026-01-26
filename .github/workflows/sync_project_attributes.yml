@@ -2,26 +2,8 @@ name: Sync Project Attributes
 
 on:
   workflow_dispatch:
-    inputs:
-      source_project_number:
-        description: 'Source project number'
-        required: true
-        type: string
-      target_project_number:
-        description: 'Target project number'
-        required: true
-        type: string
-      source_org:
-        description: 'Source organization (leave empty if source project is in current repo)'
-        required: false
-        type: string
-      target_org:
-        description: 'Target organization (leave empty if target project is in current repo)'
-        required: false
-        type: string
   schedule:
-    # Run every day at midnight
-    - cron: '0 0 * * *'
+    - cron: "*/10 * * * *"   # every 10 minutes
 
 permissions:
   contents: read
