@@ -20,47 +20,15 @@ jobs:
           script: |
             const PROJECT_ID = 74;
             const FIELD_ID = 254854360;
-            const itemId = context.payload.projects_v2_item?.id;
-            if (!itemId) return;
+            
+            const issue = context.payload.issue;
 
-            // 1. Fetch item + parent
-            const item = await github.graphql(`
-              query ($itemId: ID!) {
-                node(id: $itemId) {
-                  ... on ProjectV2Item {
-                    content {
-                      ... on Issue {
-                        id
-                        parent { ... on Issue { id } }
-                      }
-                    }
-                    fieldValues(first: 20) {
-                      nodes {
-                        ... on ProjectV2ItemFieldTextValue {
-                          text
-                          field { id name }
-                        }
-                      }
-                    }
-                  }
-                }
-              }
-            `, { itemId });
-
-            const issue = item.node.content;
-            if (!issue?.parent?.id) return;
-
-            const childValue =
-              item.node.fieldValues.nodes
-                .find(v => v.field.id === FIELD_ID)?.text;
-
-            if (childValue) return;
-
-            // 2. Fetch parent PCESA value
-            const parent = await github.graphql(`
-              query ($issueId: ID!) {
-                node(id: $issueId) {
+            // 1. Find parent’s project item & PCESA value
+            const parentData = await github.graphql(`
+              query ($id: ID!) {
+                node(id: $id) {
                   ... on Issue {
+                    id
                     projectItems(first: 10) {
                       nodes {
                         id
@@ -75,44 +43,85 @@ jobs:
                         }
                       }
                     }
+                    subIssues(first: 50) {
+                      nodes {
+                        id
+                        repository { nameWithOwner }
+                      }
+                    }
                   }
                 }
               }
-            `, { issueId: issue.parent.id });
-
+            `, { id: issue.node_id });
+            
             const parentItem =
-              parent.node.projectItems.nodes
+              parentData.node.projectItems.nodes
                 .find(i => i.project.id === PROJECT_ID);
-
+            
             if (!parentItem) return;
-
+            
             const parentValue =
               parentItem.fieldValues.nodes
                 .find(v => v.field.id === FIELD_ID)?.text;
-
+            
             if (!parentValue) return;
-
-            // 3. Update child
-            await github.graphql(`
-              mutation ($projectId: ID!, $itemId: ID!, $fieldId: ID!, $value: String!) {
-                updateProjectV2ItemFieldValue(
-                  input: {
-                    projectId: $projectId
-                    itemId: $itemId
-                    fieldId: $fieldId
-                    value: { text: $value }
+            
+            // 2. Propagate to children
+            for (const child of parentData.node.subIssues.nodes) {
+              const childData = await github.graphql(`
+                query ($id: ID!) {
+                  node(id: $id) {
+                    ... on Issue {
+                      projectItems(first: 10) {
+                        nodes {
+                          id
+                          project { id }
+                          fieldValues(first: 20) {
+                            nodes {
+                              ... on ProjectV2ItemFieldTextValue {
+                                text
+                                field { id }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
                   }
-                ) {
-                  projectV2Item { id }
                 }
-              }
-            `, {
-              projectId: PROJECT_ID,
-              itemId,
-              fieldId: FIELD_ID,
-              value: parentValue
-            });
-
-
-
-
+              `, { id: child.id });
+            
+              const childItem =
+                childData.node.projectItems.nodes
+                  .find(i => i.project.id === PROJECT_ID);
+            
+              if (!childItem) continue;
+            
+              const childValue =
+                childItem.fieldValues.nodes
+                  .find(v => v.field.id === FIELD_ID)?.text;
+            
+              if (childValue) continue;
+            
+              await github.graphql(`
+                mutation ($projectId: ID!, $itemId: ID!, $fieldId: ID!, $value: String!) {
+                  updateProjectV2ItemFieldValue(
+                    input: {
+                      projectId: $projectId
+                      itemId: $itemId
+                      fieldId: $fieldId
+                      value: { text: $value }
+                    }
+                  ) {
+                    projectV2Item { id }
+                  }
+                }
+              `, {
+                projectId: PROJECT_ID,
+                itemId: childItem.id,
+                fieldId: FIELD_ID,
+                value: parentValue
+              });
+            }
+            
+            
