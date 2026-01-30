@@ -1,8 +1,8 @@
 name: Sync Parent ESDIS Reference
 
 on:
-  project_card:
-    types: [created, edited]
+  issues:
+    types: [opened, edited]
 
 jobs:
   propagate:
