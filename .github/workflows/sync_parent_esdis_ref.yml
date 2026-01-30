@@ -8,8 +8,9 @@ jobs:
   propagate:
     runs-on: ubuntu-latest
     permissions:
-      issues: read
-      projects: write
+      contents: read
+      issues: write
+      repository-projects: write
 
     steps:
       - name: Sync PCESA Ref from parent
