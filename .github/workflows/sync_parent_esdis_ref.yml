@@ -1,7 +1,7 @@
 name: Sync Parent ESDIS Reference
 
 on:
-  project_v2_item:
+  project_card:
     types: [created, edited]
 
 jobs:
