@@ -83,6 +83,34 @@ def extract_sub_issues(parent_issue):
         sys.exit(1)
 
 
+def add_esdis_ref(issue_node_id, esdis_ref):
+    query = '''
+            mutation ($projectId: ID!, $itemId: ID!, $fieldId: ID!, $value: String!) {
+                      updateProjectV2ItemFieldValue(
+                        input: {
+                          projectId: $projectId
+                          itemId: $itemId
+                          fieldId: $fieldId
+                          value: { text: $value }
+                        }
+                      ) {
+                        projectV2Item { id }
+                      }
+                    }
+    '''
+
+    variables = {
+        "projectId": PROJECT_ID,
+        "itemId": issue_node_id,
+        "fieldId": FIELD_ID,
+        "value": esdis_ref
+      }
+    result = graphql(query, variables, TOKEN)
+    return result
+
+
+
+
 def main():
     # Read required environment variables
 
@@ -110,28 +138,9 @@ def main():
             continue
 
         # Here you would add the mutation to update the sub-issue with the ESDIS ref
+        add_esdis_ref(sub_issue_id, esdis_ref)
+        print(f"Added ESDIS reference to sub-issue {sub_issue_id}."
 
-        query = '''
-        mutation ($projectId: ID!, $itemId: ID!, $fieldId: ID!, $value: String!) {
-                  updateProjectV2ItemFieldValue(
-                    input: {
-                      projectId: $projectId
-                      itemId: $itemId
-                      fieldId: $fieldId
-                      value: { text: $value }
-                    }
-                  ) {
-                    projectV2Item { id }
-                  }
-                }
-              `, {
-                projectId: PROJECT_ID,
-                itemId: childItem.id,
-                fieldId: FIELD_ID,
-                value: parentValue
-              });
-            }
-            '''
 
 
 if __name__ == "__main__":
