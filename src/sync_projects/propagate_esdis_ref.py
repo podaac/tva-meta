@@ -79,6 +79,7 @@ def extract_esdis_ref(parent_issue):
                     parent_value = v.get("text")
                     break
         print(f"Parent PCESA Ref: {parent_value}")
+        return parent_value
     except Exception as e:
         print(f"Error processing parent data: {e}", file=sys.stderr)
         sys.exit(1)
