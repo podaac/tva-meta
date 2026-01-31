@@ -1,7 +1,8 @@
 import os
-import requests
 import sys
 import logging
+from .common import graphql
+import requests
 
 # Configure logging
 logging.basicConfig(
@@ -30,17 +31,6 @@ REPO_OWNER = os.environ.get("GITHUB_REPOSITORY", "").split("/")[0] if "/" in os.
 
 # Fields to synchronize
 FIELDS_TO_SYNC = {"Status": "Status", "Estimate": "Estimate", "Sprint":"Iteration"}
-
-
-def graphql(query, variables=None):
-    """Execute a GraphQL query against the GitHub API"""
-    response = requests.post(
-        GITHUB_API,
-        headers=HEADERS,
-        json={"query": query, "variables": variables or {}},
-    )
-    response.raise_for_status()
-    return response.json().get("data", {})
 
 
 

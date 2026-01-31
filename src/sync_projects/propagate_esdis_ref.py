@@ -2,25 +2,13 @@ import os
 import sys
 import json
 import requests
+from common import graphql
 
 GITHUB_API_URL = "https://api.github.com/graphql"
 TOKEN = os.environ.get("PROJECTS_TOKEN")
 PROJECT_ID = os.environ.get("PROJECT_ID", "PVT_kwDOAVayxs4BKQLN")
 FIELD_ID = os.environ.get("FIELD_ID", "PVTF_lADOAVayxs4BKQLNzg8wxNg")
 
-
-def get_github_graphql(query, variables, token):
-    headers = {
-        "Authorization": f"Bearer {token}",
-        "Content-Type": "application/json"
-    }
-    response = requests.post(
-        GITHUB_API_URL,
-        headers=headers,
-        json={"query": query, "variables": variables}
-    )
-    response.raise_for_status()
-    return response.json()
 
 def get_issue(issue_node_id):
     query = '''
@@ -42,7 +30,7 @@ def get_issue(issue_node_id):
                        text
                        field {
                          ... on ProjectV2FieldCommon {
-                           id 
+                           id
                          }
                        }
                      }
@@ -61,7 +49,7 @@ def get_issue(issue_node_id):
        }
        '''
     variables = {"id": issue_node_id}
-    result = get_github_graphql(query, variables, TOKEN)
+    result = graphql(query, variables, TOKEN)
     print('Parent Data:', json.dumps(result, indent=2))
     return result
 
@@ -69,7 +57,7 @@ def get_issue(issue_node_id):
 def extract_esdis_ref(parent_issue):
 
     try:
-        parent_items = parent_issue["data"]["node"]["projectItems"]["nodes"]
+        parent_items = parent_issue["node"]["projectItems"]["nodes"]
         parent_item = next((i for i in parent_items if i["project"]["id"] == PROJECT_ID), None)
         print('Parent Item:', json.dumps(parent_item, indent=2))
         parent_value = None
@@ -116,6 +104,35 @@ def main():
         print(f"Sub-issue ID: {sub_issue_id} should be updated with ESDIS Ref: {esdis_ref}")
         sub_issue = get_issue(sub_issue_id)
         print("child issue node:", json.dumps(sub_issue, indent=2))
+        child_esdis_ref = extract_esdis_ref(sub_issue)
+        if child_esdis_ref:
+            print(f"Sub-issue {sub_issue_id} already has an ESDIS reference. Change manually.")
+            continue
+
+        # Here you would add the mutation to update the sub-issue with the ESDIS ref
+
+        query = '''
+        mutation ($projectId: ID!, $itemId: ID!, $fieldId: ID!, $value: String!) {
+                  updateProjectV2ItemFieldValue(
+                    input: {
+                      projectId: $projectId
+                      itemId: $itemId
+                      fieldId: $fieldId
+                      value: { text: $value }
+                    }
+                  ) {
+                    projectV2Item { id }
+                  }
+                }
+              `, {
+                projectId: PROJECT_ID,
+                itemId: childItem.id,
+                fieldId: FIELD_ID,
+                value: parentValue
+              });
+            }
+            '''
+
 
 if __name__ == "__main__":
     main()
