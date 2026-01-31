@@ -68,10 +68,10 @@ jobs:
               parentData.node.projectItems.nodes
                 .find(i => i.project.id === PROJECT_ID);
             
-            console.log(`Parent Item: ${parentItem}`);
+            console.log('Parent Item:': , JSON.stringify(parentItem, null, 2));
             const parentValue =
               parentItem.fieldValues.nodes
-                .find(v => v.field.id === FIELD_ID)?.text;
+                .find(v => v.field && v.field.id === FIELD_ID)?.text;
             console.log(`Parent PCESA Ref: ${parentValue}`);
 
             if (!parentValue) return;
