@@ -62,7 +62,7 @@ jobs:
               }
             `, { id: issue.node_id });
             
-            console.log(`Parent Data: ${parentData}`);
+            console.log('Parent Data:', JSON.stringify(parentData, null, 2));
             const parentItem =
               parentData.node.projectItems.nodes
                 .find(i => i.project.id === PROJECT_ID);
@@ -74,7 +74,3 @@ jobs:
             console.log(`Parent PCESA Ref: ${parentValue}`);
 
             if (!parentValue) return;
-            
-            
-            
-            
