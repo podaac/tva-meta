@@ -32,7 +32,11 @@ jobs:
                     projectItems(first: 10) {
                       nodes {
                         id
-                        project { id }
+                        project {
+                           ... on ProjectV2 {
+                             id
+                            }
+                        }
                         fieldValues(first: 20) {
                           nodes {
                             ... on ProjectV2ItemFieldTextValue {
