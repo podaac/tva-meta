@@ -19,8 +19,8 @@ jobs:
         with:
           github-token: ${{ secrets.PROJECTS_TOKEN }}
           script: |
-            const PROJECT_ID = PVT_kwDOAVayxs4BKQLN;
-            const FIELD_ID = PVTF_lADOAVayxs4BKQLNzg8wxNg;
+            const PROJECT_ID = "PVT_kwDOAVayxs4BKQLN";
+            const FIELD_ID = "PVTF_lADOAVayxs4BKQLNzg8wxNg";
             
             const issue = context.payload.issue;
 
