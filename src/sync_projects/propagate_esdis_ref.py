@@ -132,8 +132,8 @@ def main():
             continue
 
         # Here you would add the mutation to update the sub-issue with the ESDIS ref
-        add_esdis_ref(sub_issue_id, esdis_ref)
-        print(f"Added ESDIS reference to sub-issue {sub_issue_id}.")
+        result = add_esdis_ref(sub_issue_id, esdis_ref)
+        print(f"Added ESDIS reference to sub-issue {sub_issue_id}.", result)
 
 
 
