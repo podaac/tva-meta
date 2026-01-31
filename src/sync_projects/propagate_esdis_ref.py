@@ -4,8 +4,6 @@ import json
 import requests
 from .common import graphql
 
-GITHUB_API_URL = "https://api.github.com/graphql"
-TOKEN = os.environ.get("PROJECTS_TOKEN")
 PROJECT_ID = os.environ.get("PROJECT_ID", "PVT_kwDOAVayxs4BKQLN")
 FIELD_ID = os.environ.get("FIELD_ID", "PVTF_lADOAVayxs4BKQLNzg8wxNg")
 
@@ -49,7 +47,7 @@ def get_issue(issue_node_id):
        }
        '''
     variables = {"id": issue_node_id}
-    result = graphql(query, variables, TOKEN)
+    result = graphql(query, variables)
     print('Parent Data:', json.dumps(result, indent=2))
     return result
 
@@ -105,7 +103,7 @@ def add_esdis_ref(issue_node_id, esdis_ref):
         "fieldId": FIELD_ID,
         "value": esdis_ref
       }
-    result = graphql(query, variables, TOKEN)
+    result = graphql(query, variables)
     return result
 
 

@@ -12,17 +12,10 @@ logging.basicConfig(
 )
 logger = logging.getLogger("sync_attributes")
 
-GITHUB_API = "https://api.github.com/graphql"
-
 # Get authentication token
 token = os.environ.get("GITHUB_TOKEN")
 if not token:
     raise RuntimeError("GITHUB_TOKEN is not set")
-
-HEADERS = {
-    "Authorization": f"Bearer {token}",
-    "Content-Type": "application/json",
-}
 
 # Get configuration from environment variables
 ORG = "podaac"
