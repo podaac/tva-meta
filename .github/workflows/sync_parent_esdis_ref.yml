@@ -16,7 +16,7 @@ jobs:
       - name: Sync PCESA Ref from parent
         uses: actions/github-script@v7
         with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
+          github-token: ${{ secrets.PROJECTS_TOKEN }}
           script: |
             const PROJECT_ID = 74;
             const FIELD_ID = 254854360;
