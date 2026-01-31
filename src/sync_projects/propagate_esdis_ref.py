@@ -81,7 +81,33 @@ def extract_sub_issues(parent_issue):
         sys.exit(1)
 
 
-def add_esdis_ref(issue_node_id, esdis_ref):
+def get_project_item_id(issue_node_id, project_id):
+    query = '''
+    query ($id: ID!) {
+      node(id: $id) {
+        ... on Issue {
+          projectItems(first: 20) {
+            nodes {
+              id
+              project {
+                ... on ProjectV2 { id }
+              }
+            }
+          }
+        }
+      }
+    }
+    '''
+    variables = {"id": issue_node_id}
+    result = graphql(query, variables)
+    items = result["node"]["projectItems"]["nodes"]
+    for item in items:
+        if item["project"]["id"] == project_id:
+            return item["id"]
+    return None
+
+
+def add_esdis_ref(project_item_id, esdis_ref):
     query = '''
             mutation ($projectId: ID!, $itemId: ID!, $fieldId: ID!, $value: String!) {
                       updateProjectV2ItemFieldValue(
@@ -99,7 +125,7 @@ def add_esdis_ref(issue_node_id, esdis_ref):
 
     variables = {
         "projectId": PROJECT_ID,
-        "itemId": issue_node_id,
+        "itemId": project_item_id,
         "fieldId": FIELD_ID,
         "value": esdis_ref
       }
@@ -131,12 +157,14 @@ def main():
             print(f"Sub-issue {sub_issue_id} already has an ESDIS reference. Change manually.")
             continue
 
-        # Here you would add the mutation to update the sub-issue with the ESDIS ref
-        result = add_esdis_ref(sub_issue_id, esdis_ref)
+        project_item_id = get_project_item_id(sub_issue_id, PROJECT_ID)
+        if not project_item_id:
+            print(f"Could not find project item for sub-issue {sub_issue_id}")
+            continue
+        result = add_esdis_ref(project_item_id, esdis_ref)
         print(f"Added ESDIS reference to sub-issue {sub_issue_id}.", result)
 
 
 
 if __name__ == "__main__":
     main()
-
