@@ -66,6 +66,13 @@ jobs:
               parentData.node.projectItems.nodes
                 .find(i => i.project.id === PROJECT_ID);
             
+            const parentValue =
+              parentItem.fieldValues.nodes
+                .find(v => v.field.id === FIELD_ID)?.text;
+            console.log(`Parent PCESA Ref: ${parentValue}`);
+
+            if (!parentValue) return;
+            
             
             
             
