@@ -36,8 +36,8 @@ jobs:
           ISSUE_NODE_ID: ${{ github.event.issue.node_id }}
           PROJECT_ID: PVT_kwDOAVayxs4BKQLN
           FIELD_ID: PVTF_lADOAVayxs4BKQLNzg8wxNg
-        #run:
-        #  python -m src.sync_projects.propagate_esdis_ref
-        run: |
-            python -m debugpy --listen 0.0.0.0:5678 --wait-for-client src/sync_projects/propagate_esdis_ref.py
+        run:
+          python -m src.sync_projects.propagate_esdis_ref
+        #run: |
+        #    python -m debugpy --listen 0.0.0.0:5678 --wait-for-client src/sync_projects/propagate_esdis_ref.py
 
