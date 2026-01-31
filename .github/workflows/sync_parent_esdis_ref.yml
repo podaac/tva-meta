@@ -18,8 +18,12 @@ jobs:
         uses: actions/setup-python@v4
         with:
           python-version: '3.11'
+
       - name: Install dependencies
-        run: pip install requests
+        run: |
+          python -m pip install --upgrade pip
+          pip install requests
+
       - name: Run propagate_esdis_ref
         env:
           PROJECTS_TOKEN: ${{ secrets.PROJECTS_TOKEN }}
@@ -27,3 +31,4 @@ jobs:
           PROJECT_ID: PVT_kwDOAVayxs4BKQLN
           FIELD_ID: PVTF_lADOAVayxs4BKQLNzg8wxNg
         run: python -m src.sync_projects.propagate_esdis_ref
+
