@@ -22,7 +22,7 @@ def get_github_graphql(query, variables, token):
     response.raise_for_status()
     return response.json()
 
-def get_parent_issue(issue_node_id):
+def get_issue(issue_node_id):
     query = '''
        query ($id: ID!) {
          node(id: $id) {
@@ -94,6 +94,7 @@ def extract_sub_issues(parent_issue):
         print(f"Error processing sub-issues: {e}", file=sys.stderr)
         sys.exit(1)
 
+
 def main():
     # Read required environment variables
 
@@ -103,7 +104,7 @@ def main():
         print("Missing PROJECTS_TOKEN or ISSUE_NODE_ID.", file=sys.stderr)
         sys.exit(1)
 
-    parent_issue = get_parent_issue(issue_node_id)
+    parent_issue = get_issue(issue_node_id)
     esdis_ref = extract_esdis_ref(parent_issue)
 
     if not esdis_ref:
@@ -113,7 +114,8 @@ def main():
     sub_issue_ids = extract_sub_issues(parent_issue)
     for sub_issue_id in sub_issue_ids:
         print(f"Sub-issue ID: {sub_issue_id} should be updated with ESDIS Ref: {esdis_ref}")
-
+        sub_issue = get_issue(sub_issue_id)
+        print("child issue node:", json.dumps(sub_issue, indent=2))
 
 if __name__ == "__main__":
     main()
