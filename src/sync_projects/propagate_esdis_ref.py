@@ -2,7 +2,7 @@ import os
 import sys
 import json
 import requests
-from common import graphql
+from .common import graphql
 
 GITHUB_API_URL = "https://api.github.com/graphql"
 TOKEN = os.environ.get("PROJECTS_TOKEN")
