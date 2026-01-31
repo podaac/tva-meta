@@ -41,7 +41,11 @@ jobs:
                           nodes {
                             ... on ProjectV2ItemFieldTextValue {
                               text
-                              field { id }
+                              field {
+                                ... on ProjectV2FieldCommon {
+                                  id 
+                                }
+                              }
                             }
                           }
                         }
