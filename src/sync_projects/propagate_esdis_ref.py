@@ -114,10 +114,6 @@ def main():
 
     issue_node_id = os.environ.get("ISSUE_NODE_ID")
 
-    if not TOKEN or not issue_node_id:
-        print("Missing PROJECTS_TOKEN or ISSUE_NODE_ID.", file=sys.stderr)
-        sys.exit(1)
-
     parent_issue = get_issue(issue_node_id)
     esdis_ref = extract_esdis_ref(parent_issue)
 
