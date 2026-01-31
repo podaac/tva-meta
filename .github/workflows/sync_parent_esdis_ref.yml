@@ -14,64 +14,16 @@ jobs:
       repository-projects: write
 
     steps:
-      - name: Sync PCESA Ref from parent
-        uses: actions/github-script@v7
+      - name: Set up Python
+        uses: actions/setup-python@v4
         with:
-          github-token: ${{ secrets.PROJECTS_TOKEN }}
-          script: |
-            const PROJECT_ID = "PVT_kwDOAVayxs4BKQLN";
-            const FIELD_ID = "PVTF_lADOAVayxs4BKQLNzg8wxNg";
-            
-            const issue = context.payload.issue;
-
-            // 1. Find parent’s project item & PCESA value
-            const parentData = await github.graphql(`
-              query ($id: ID!) {
-                node(id: $id) {
-                  ... on Issue {
-                    id
-                    projectItems(first: 10) {
-                      nodes {
-                        id
-                        project {
-                           ... on ProjectV2 {
-                             id
-                            }
-                        }
-                        fieldValues(first: 20) {
-                          nodes {
-                            ... on ProjectV2ItemFieldTextValue {
-                              text
-                              field {
-                                ... on ProjectV2FieldCommon {
-                                  id 
-                                }
-                              }
-                            }
-                          }
-                        }
-                      }
-                    }
-                    subIssues(first: 50) {
-                      nodes {
-                        id
-                        repository { nameWithOwner }
-                      }
-                    }
-                  }
-                }
-              }
-            `, { id: issue.node_id });
-            
-            console.log('Parent Data:', JSON.stringify(parentData, null, 2));
-            const parentItem =
-              parentData.node.projectItems.nodes
-                .find(i => i.project.id === PROJECT_ID);
-            
-            console.log('Parent Item:', JSON.stringify(parentItem, null, 2));
-            const parentValue =
-              parentItem.fieldValues.nodes
-                .find(v => v.field && v.field.id === FIELD_ID)?.text;
-            console.log(`Parent PCESA Ref: ${parentValue}`);
-
-            if (!parentValue) return;
+          python-version: '3.11'
+      - name: Install dependencies
+        run: pip install requests
+      - name: Run propagate_esdis_ref
+        env:
+          PROJECTS_TOKEN: ${{ secrets.PROJECTS_TOKEN }}
+          ISSUE_NODE_ID: ${{ github.event.issue.node_id }}
+          PROJECT_ID: PVT_kwDOAVayxs4BKQLN
+          FIELD_ID: PVTF_lADOAVayxs4BKQLNzg8wxNg
+        run: python src/sync_projects/propagate_esdis_ref.py
