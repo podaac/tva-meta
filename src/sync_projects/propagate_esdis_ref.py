@@ -67,12 +67,12 @@ def extract_esdis_ref(parent_issue):
         print(f"Parent PCESA Ref: {parent_value}")
         return parent_value
     except Exception as e:
-        print(f"Error processing parent data: {e}", file=sys.stderr)
+        print(f"Error extracting the ESDIS ref: {e}", file=sys.stderr)
         sys.exit(1)
 
 def extract_sub_issues(parent_issue):
     try:
-        sub_issues = parent_issue["data"]["node"]["subIssues"]["nodes"]
+        sub_issues = parent_issue["node"]["subIssues"]["nodes"]
         sub_issue_ids = [issue["id"] for issue in sub_issues]
         print(f"Sub-issue IDs: {sub_issue_ids}")
         return sub_issue_ids
