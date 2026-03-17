@@ -1,0 +1,72 @@
+name: Sync Milestones Across Organization Repositories
+
+on:
+  workflow_dispatch:
+    inputs:
+      source_repo:
+        description: "Source repository (owner/repo) used as milestone reference"
+        required: true
+      org:
+        description: "GitHub organization to sync milestones into"
+        required: true
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  sync-milestones:
+    runs-on: ubuntu-latest
+    environment: podaac projects
+
+    steps:
+
+      - name: Fetch milestones from source repository
+        run: |
+          gh milestone list \
+            --repo "${{ inputs.source_repo }}" \
+            --json title,description,dueOn,state \
+            --limit 1000 > milestones.json
+          cat milestones.json
+        env:
+          GH_TOKEN: ${{ secrets.PROJECTS_TOKEN }}
+
+
+      - name: List repositories in organization
+        run: |
+          gh repo list "${{ inputs.org }}" \
+            --limit 1000 \
+            --json name,owner \
+            -q '.[] | .owner.login + "/" + .name' \
+            > repos.txt
+          cat repos.txt
+        env:
+          GH_TOKEN: ${{ secrets.PROJECTS_TOKEN }}
+
+      - name: Add milestones to all repositories in organization
+        run: |
+          while read repo; do
+            echo "Syncing milestones to $repo"
+            jq -c '.[]' milestones.json | while read milestone; do
+              title=$(echo "$milestone" | jq -r '.title')
+              desc=$(echo "$milestone" | jq -r '.description // ""')
+              due_date=$(echo "$milestone" | jq -r '.dueOn // ""')
+              state=$(echo "$milestone" | jq -r '.state')
+
+              # Create milestone only if it does not already exist
+              if [ -n "$due_date" ]; then
+                gh milestone create "$title" \
+                  --repo "$repo" \
+                  --description "$desc" \
+                  --due-date "$due_date" \
+                  || true
+              else
+                gh milestone create "$title" \
+                  --repo "$repo" \
+                  --description "$desc" \
+                  || true
+              fi
+            done
+          done < repos.txt
+        env:
+          GH_TOKEN: ${{ secrets.PROJECTS_TOKEN }}

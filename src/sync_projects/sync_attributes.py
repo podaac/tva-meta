@@ -304,7 +304,7 @@ def update_field_value(project_id, item_id, field_id, field, value):
               id
             }
           }
-        }
+        }   
         """
         variables["iterationId"] = value
         logger.info("Updating iteration field with variables: %s", variables)
