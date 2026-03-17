@@ -23,10 +23,9 @@ jobs:
 
       - name: Fetch milestones from source repository
         run: |
-          gh milestone list \
-            --repo "${{ inputs.source_repo }}" \
-            --json title,description,dueOn,state \
-            --limit 1000 > milestones.json
+          gh api "/repos/${{ inputs.source_repo }}/milestones" \
+            --jq '.[] | {title: .title, description: .description, due_on: .due_on, state: .state}' \
+            | jq -s '.' > milestones.json
           cat milestones.json
         env:
           GH_TOKEN: ${{ secrets.PROJECTS_TOKEN }}
@@ -47,25 +46,37 @@ jobs:
         run: |
           while read repo; do
             echo "Syncing milestones to $repo"
+
+            # Get existing milestones in target repo
+            gh api "/repos/$repo/milestones" --jq '.[].title' > existing_milestones.txt || true
+
             jq -c '.[]' milestones.json | while read milestone; do
               title=$(echo "$milestone" | jq -r '.title')
               desc=$(echo "$milestone" | jq -r '.description // ""')
-              due_date=$(echo "$milestone" | jq -r '.dueOn // ""')
+              due_on=$(echo "$milestone" | jq -r '.due_on // ""')
               state=$(echo "$milestone" | jq -r '.state')
 
-              # Create milestone only if it does not already exist
-              if [ -n "$due_date" ]; then
-                gh milestone create "$title" \
-                  --repo "$repo" \
-                  --description "$desc" \
-                  --due-date "$due_date" \
-                  || true
-              else
-                gh milestone create "$title" \
-                  --repo "$repo" \
-                  --description "$desc" \
-                  || true
+              # Check if milestone already exists
+              if grep -Fxq "$title" existing_milestones.txt; then
+                echo "  Milestone '$title' already exists in $repo, skipping"
+                continue
               fi
+
+              echo "  Creating milestone '$title' in $repo"
+
+              # Build the JSON payload
+              payload=$(jq -n \
+                --arg title "$title" \
+                --arg desc "$desc" \
+                --arg due "$due_on" \
+                --arg state "$state" \
+                '{title: $title, description: $desc, state: $state} + if $due != "" then {due_on: $due} else {} end')
+
+              # Create milestone via API
+              gh api "/repos/$repo/milestones" \
+                --method POST \
+                --input - <<< "$payload" \
+                || echo "  Failed to create milestone '$title' in $repo"
             done
           done < repos.txt
         env:
